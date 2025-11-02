@@ -1,0 +1,4 @@
+# Ignore all generated Maven files
+/target/
+# Ignore any IDE/OS files
+.DS_Store
