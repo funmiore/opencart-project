@@ -5,15 +5,13 @@ import io.cucumber.testng.CucumberOptions;
 import org.testng.annotations.DataProvider;
 
 @CucumberOptions(
-    // 💡 Point 1: Location of your Gherkin files
-    features = "src/test/resources/features/Registration.feature", 
+    features = "src/test/resources/features/OpenCartTests.feature",
     
-    // 💡 Point 2: Location of your Step Definition Java files
     glue = "com.opencart.tests" 
 )
 public class TestRunner extends AbstractTestNGCucumberTests {
 
-    // This data provider ensures parallel test execution (optional, but good practice)
+    // This data provider ensures parallel test execution
     @Override
     @DataProvider(parallel = true)
     public Object[][] scenarios() {
