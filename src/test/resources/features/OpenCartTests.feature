@@ -57,4 +57,12 @@ Feature: OpenCart Core Functionality Tests
     When I click the My Account link to open the dropdown
     And I click the Logout link in the dropdown
     Then I should be redirected to the Account Logout success page
+
+    # INVALID LOGIN WITH INCORRECT PASSWORD 
+  Scenario: Invalid user login with incorrect password
+    Given I initialize the browser and navigate to the base URL
+    And I am on the OpenCart login page
+    When I enter a valid email and an incorrect password
+    And I click the Login button
+    Then I should see the warning message "Warning: No match for E-Mail Address and/or Password."
   

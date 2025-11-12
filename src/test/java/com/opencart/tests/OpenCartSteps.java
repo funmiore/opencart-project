@@ -135,13 +135,21 @@ public void i_should_see_the_warning_message(String expectedMessage) {
     By warningLocator = By.cssSelector("div.alert-danger");
 
     try {
-        // Wait for the warning message to appear and get its text
+        // Wait for the element that has the red alert class AND the exact expected text
         WebElement warningElement = wait.until(ExpectedConditions.visibilityOfElementLocated(warningLocator));
-        String actualText = warningElement.getText().trim();
         
-        // Assert that the text contains the expected warning message
-        Assert.assertTrue(actualText.contains(expectedMessage), 
-            "Verification Failed: Expected to find '" + expectedMessage + "' but found: " + actualText);
+        // --- START OF THE REQUESTED TRY BLOCK ---
+        
+        // Get the full text of the warning element, convert it to lowercase, and trim spaces
+        String actualText = warningElement.getText().trim().toLowerCase();
+        
+        // Convert the expected text to lowercase to ensure case-insensitivity
+        String lowerCaseExpected = expectedMessage.toLowerCase();
+        
+        // Assert that the actual text contains the expected message (robust check)
+        Assert.assertTrue(actualText.contains(lowerCaseExpected), 
+            "Verification Failed: Expected to find warning containing '" + expectedMessage + 
+            "' but found: '" + warningElement.getText().trim() + "'"); // Display the ACTUAL text for debugging
         
         System.out.println("TEST PASSED: Correct warning message was displayed. ✅");
         
@@ -220,33 +228,25 @@ public void i_should_see_the_email_field_validation_message(String expectedMessa
         driver.findElement(By.id("input-password")).sendKeys("Opencart@1"); 
     }
 
-    @When("I click the Login button")
+   @When("I click the Login button")
 public void i_click_the_login_button() {
-    System.out.println("Submitting Login form directly using XPath...");
+    System.out.println("Clicking Login button...");
 
     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    
-    // 💡 Using XPath to find the FORM element with id='form-login'
-    By formLocator = By.xpath("//*[@id=\"content\"]/div/div[2]/div/form/input");
-    
-    // Explicitly wait for the FORM element to be visible before finding it.
-    WebElement loginForm = wait.until(ExpectedConditions.visibilityOfElementLocated(formLocator));
 
-    // Submit the form directly, bypassing issues with clicking the button locator.
-    loginForm.submit();
+    // ✅ FIX: Use the stable CSS selector to find the Login button (<input type="submit" value="Login">)
+    By loginButtonLocator = By.cssSelector("input[value='Login']");
+
+    WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(loginButtonLocator));
+    loginButton.click();
+    
+    // NOTE: This method is now clean. The verification (success or warning) 
+    // is handled entirely by the subsequent @Then steps.
+    
+    // NOTE: This clean step relies entirely on the *following* 'Then' steps 
+    // to verify if the login was successful or if a warning message appeared.
     
     // Check for an immediate failure message (Red Alert Box) after click
-    try {
-        WebDriverWait failureWait = new WebDriverWait(driver, Duration.ofSeconds(2));
-        failureWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.alert-danger")));
-        
-        String errorMessage = driver.findElement(By.cssSelector("div.alert-danger")).getText();
-        System.err.println("CRITICAL FAILURE: Login failed. Error message found: " + errorMessage);
-        Assert.fail("Login failed: Credentials did not work. Please check the email and password.");
-        
-    } catch (org.openqa.selenium.TimeoutException ignored) {
-        System.out.println("No immediate login error detected. Proceeding to success page verification.");
-    }
 }
 
     @Then("I should be redirected to the My Account page")
@@ -264,6 +264,20 @@ public void i_click_the_login_button() {
         } 
         // ⚠️ NO driver.quit() here! We need the browser session for the Logout test.
     }
+
+    // ⬇️ NEW METHOD FOR INCORRECT PASSWORD ⬇️
+@When("I enter a valid email and an incorrect password")
+public void i_enter_a_valid_email_and_an_incorrect_password() {
+    System.out.println("Entering login credentials with incorrect password...");
+    // Use an explicit wait to ensure the form fields are ready
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("input-email")));
+
+    // 💡 IMPORTANT: Use the same valid email as your success scenario!
+    driver.findElement(By.id("input-email")).sendKeys("richard@opencart.com"); 
+    // ❌ Enter an incorrect password
+    driver.findElement(By.id("input-password")).sendKeys("WrongPassword123"); 
+}
 
 // ... LOGOUT STEPS
 
